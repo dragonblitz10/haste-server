@@ -5,6 +5,8 @@
     },
     "extends": "eslint:recommended",
     "rules": {
+        "no-redeclare": 0,
+        "no-unused-vars": 0,
         "indent": [
             "error",
             2

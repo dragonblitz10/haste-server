@@ -165,13 +165,12 @@ haste.prototype.newDocument = function(hideHistory) {
 // due to the behavior of lookupTypeByExtension and lookupExtensionByType
 // Note: optimized for lookupTypeByExtension
 haste.extensionMap = {
-  rb: 'ruby', py: 'python', pl: 'perl', php: 'php', scala: 'scala', go: 'go',
-  xml: 'xml', html: 'xml', htm: 'xml', css: 'css', js: 'javascript', vbs: 'vbscript',
-  lua: 'lua', pas: 'delphi', java: 'java', cpp: 'cpp', cc: 'cpp', m: 'objectivec',
-  vala: 'vala', sql: 'sql', sm: 'smalltalk', lisp: 'lisp', ini: 'ini',
-  diff: 'diff', bash: 'bash', sh: 'bash', tex: 'tex', erl: 'erlang', hs: 'haskell',
-  md: 'markdown', txt: '', coffee: 'coffee', swift: 'swift'
-};
+	sh: 'bash', clike: 'c-like', coffee: 'coffeescript', cs: 'csharp', dpr: 'delphi',
+	erl: 'erlang', hs: 'haskell', js: 'javascript', kt: 'kotlin', tex: 'latex',
+	lsp: 'lisp', mk: 'makefile', md: 'markdown', mm: 'objectivec', phptemp: 'php-template',
+	pl: 'perl',	txt: 'plaintext', py: 'python', pyrepl: 'python-repl', rb: 'ruby', rs: 'rust',
+	sc: 'scala', sm: 'smalltalk', ts: 'typscript', vbs: 'vbscript', html: 'xml', htm: 'xml',
+}
 
 // Look up the extension preferred for a type
 // If not found, return the type itself - which we'll place as the extension

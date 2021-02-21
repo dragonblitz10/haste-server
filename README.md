@@ -3,7 +3,7 @@
 Haste is an open-source pastebin software written in node.js, which is easily
 installable in any network.  It can be backed by either redis or filesystem,
 and has a very easy adapter interface for other stores.  A publicly available
-version can be found at [hastebin.com](http://hastebin.com)
+version can be found at [hastebin.com](https://hastebin.com)
 
 Major design objectives:
 
@@ -22,16 +22,18 @@ STDOUT.  Check the README there for more details and usages.
 
 ## Tested Browsers
 
-* Firefox 8
-* Chrome 17
-* Safari 5.3
+* Firefox 88, 60 and 8
+* Chrome 85, 60 and 17
+* Safari 14, 10.1 and 5.3
+* Edge 88, 79 and 15
+* Opera 73, 55 and 30
 
 ## Installation
 
-1.  Download the package, and expand it
-2.  Explore the settings inside of config.js, but the defaults should be good
+1.  `git clone https://github.com/dragonblitz10/haste-server`
+2.  Explore and change values inside of config.js, but the defaults should be good enough for a first install.
 3.  `npm install`
-4.  `npm start` (you may specify an optional `<config-path>` as well)
+4.  `npm start` or `node .`
 
 ## Settings
 
@@ -39,23 +41,23 @@ STDOUT.  Check the README there for more details and usages.
 * `port` - the port the server runs on (default 7777)
 * `keyLength` - the length of the keys to user (default 10)
 * `maxLength` - maximum length of a paste (default 400000)
+* `minLength` - minimum length of a paste (default 10)
 * `staticMaxAge` - max age for static assets (86400)
 * `recompressStaticAssets` - whether or not to compile static js assets (true)
-* `documents` - static documents to serve (ex: http://hastebin.com/about.com)
+* `documents` - static documents to serve (ex: https://hastebin.com/about)
   in addition to static assets.  These will never expire.
 * `storage` - storage options (see below)
 * `logging` - logging preferences
 * `keyGenerator` - key generator options (see below)
-* `rateLimits` - settings for rate limiting (see below)
+* `ratelimit` - settings for rate limiting (see below)
 
 ## Rate Limiting
 
-When present, the `rateLimits` option enables built-in rate limiting courtesy
-of `connect-ratelimit`.  Any of the options supported by that library can be
+When present, the `ratelimit` option enables built-in rate limiting courtesy
+of `express-ratelimits`.  Any of the options supported by that library can be
 used and set in `config.js`.
 
-See the README for [connect-ratelimit](https://github.com/dharmafly/connect-ratelimit)
-for more information!
+See the [package info](https://www.npmjs.com/package/express-rate-limit) for more information!
 
 ## Key Generation
 
@@ -103,8 +105,7 @@ File storage currently does not support paste expiration, you can follow [#191](
 
 ### Redis
 
-To use redis storage you must install the `redis` package in npm, and have
-`redis-server` running on the machine.
+To use redis storage you must install the `redis` package in npm, and either have a redis server running locally or externally.
 
 `npm install redis`
 
@@ -279,7 +280,7 @@ your bucket:
 ### Build image
 
 ```bash
-docker build --tag haste-server .
+docker build -t haste-server .
 ```
 
 ### Run container
@@ -287,72 +288,9 @@ docker build --tag haste-server .
 For this example we will run haste-server, and connect it to a redis server
 
 ```bash
-docker run --name haste-server-container --env STORAGE_TYPE=redis --env STORAGE_HOST=redis-server --env STORAGE_PORT=6379 haste-server
+docker run --name hastebin -v $pwd:/config.js:/app/config.js -v $pwd:/app/data -p 7777:7777 haste-server
 ```
 
-### Use docker-compose example
-
-There is an example `docker-compose.yml` which runs haste-server together with memcached
-
-```bash
-docker-compose up
-```
-
-### Configuration
-
-The docker image is configured using environmental variables as you can see in the example above.
-
-Here is a list of all the environment variables
-
-### Storage
-
-|          Name          | Default value |                                                  Description                                                  |
-| :--------------------: | :-----------: | :-----------------------------------------------------------------------------------------------------------: |
-|      STORAGE_TYPE      |   memcached   |    Type of storage . Accepted values: "memcached","redis","postgres","rethinkdb", "amazon-s3", and "file"     |
-|      STORAGE_HOST      |   127.0.0.1   |                 Storage host. Applicable for types: memcached, redis, postgres, and rethinkdb                 |
-|      STORAGE_PORT      |     11211     |           Port on the storage host. Applicable for types: memcached, redis, postgres, and rethinkdb           |
-| STORAGE_EXPIRE_SECONDS |    2592000    | Number of seconds to expire keys in. Applicable for types. Redis, postgres, memcached. `expire` option to the |
-|       STORAGE_DB       |       2       |                    The name of the database. Applicable for redis, postgres, and rethinkdb                    |
-|    STORAGE_PASSWORD    |               |                       Password for database. Applicable for redis, postges, rethinkdb .                       |
-|    STORAGE_USERNAME    |               |                           Database username. Applicable for postgres, and rethinkdb                           |
-|   STORAGE_AWS_BUCKET   |               |                          Applicable for amazon-s3. This is the name of the S3 bucket                          |
-|   STORAGE_AWS_REGION   |               |                      Applicable for amazon-s3. The region in which the bucket is located                      |
-|    STORAGE_FILEPATH    |               |                            Path to file to save data to. Applicable for type file                             |
-
-### Logging
-
-|       Name        | Default value | Description |
-| :---------------: | :-----------: | :---------: |
-|   LOGGING_LEVEL   |    verbose    |             |
-|   LOGGING_TYPE=   |    Console    |
-| LOGGING_COLORIZE= |     true      |
-
-### Basics
-
-|           Name           |  Default value   |                                        Description                                        |
-| :----------------------: | :--------------: | :---------------------------------------------------------------------------------------: |
-|           HOST           |     0.0.0.0      |                         The hostname which the server answers on                          |
-|           PORT           |       7777       |                          The port on which the server is running                          |
-|        KEY_LENGTH        |        10        |                              the length of the keys to user                               |
-|        MAX_LENGTH        |      400000      |                                 maximum length of a paste                                 |
-|      STATIC_MAX_AGE      |      86400       |                                 max age for static assets                                 |
-| RECOMPRESS_STATIC_ASSETS |       true       |                        whether or not to compile static js assets                         |
-|    KEYGENERATOR_TYPE     |     phonetic     |             Type of key generator. Acceptable values: "phonetic", or "random"             |
-|  KEYGENERATOR_KEYSPACE   |                  |                  keySpace argument is a string of acceptable characters                   |
-|        DOCUMENTS         | about=./about.md | Comma separated list of static documents to serve. ex: \n about=./about.md,home=./home.md |
-
-### Rate limits
-
-|                 Name                 |             Default value             |                                       Description                                        |
-| :----------------------------------: | :-----------------------------------: | :--------------------------------------------------------------------------------------: |
-|   RATELIMITS_NORMAL_TOTAL_REQUESTS   |                  500                  | By default anyone uncategorized will be subject to 500 requests in the defined timespan. |
-| RATELIMITS_NORMAL_EVERY_MILLISECONDS |                 60000                 |             The timespan to allow the total requests for uncategorized users             |
-| RATELIMITS_WHITELIST_TOTAL_REQUESTS  |                                       |      By default client names in the whitelist will not have their requests limited.      |
-|  RATELIMITS_WHITELIST_EVERY_SECONDS  |                                       |      By default client names in the whitelist will not have their requests limited.      |
-|         RATELIMITS_WHITELIST         | example1.whitelist,example2.whitelist |           Comma separated list of the clients which are in the whitelist pool            |
-| RATELIMITS_BLACKLIST_TOTAL_REQUESTS  |                                       |    By default client names in the blacklist will be subject to 0 requests per hours.     |
-|  RATELIMITS_BLACKLIST_EVERY_SECONDS  |                                       |     By default client names in the blacklist will be subject to 0 requests per hours     |
-|         RATELIMITS_BLACKLIST         | example1.blacklist,example2.blacklist |           Comma separated list of the clients which are in the blacklistpool.            |
 
 ## Author
 
