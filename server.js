@@ -92,16 +92,17 @@ const limiter = rl({
   max: config.ratelimit.requests,
   message: { error: 'Please slow down!' }
 });
-// Static assets, Rate Limits and parse text
-app.use(express.static('static'));
-app.use(limiter);
-app.use(bodyParser.text());
 // Hide express is running and allow COR
 app.use((req, res, next) => {
   res.setHeader('X-Powered-By', 'Hastebin/Server');
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
 });
+// Static assets, Rate Limits and parse text
+app.use(express.static('static'));
+app.use(limiter);
+app.use(bodyParser.text());
+
 // Main endpoints
 app.get('/raw/:id', function(request, response) {
   return documentHandler.handleRawGet(request, response, config);
