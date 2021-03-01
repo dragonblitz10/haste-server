@@ -1,4 +1,4 @@
-/* global $, hljs, window, document */
+/* global $, hljs, window, document localStorage */
 
 ///// represents a single document
 
@@ -69,6 +69,7 @@ haste_document.prototype.save = function(data, callback) {
       _this.locked = true;
       _this.key = res.key;
       var high = hljs.highlightAuto(data);
+      localStorage.removeItem('autosave');
       callback(null, {
         value: high.value,
         key: res.key,
@@ -116,7 +117,7 @@ haste.prototype.showMessage = function(msg, cls) {
   $('#messages').prepend(msgBox);
   setTimeout(function() {
     msgBox.slideUp('fast', function() { $(this).remove(); });
-  }, 3000);
+  }, 30000);
 };
 
 // Show the light key
@@ -146,7 +147,7 @@ haste.prototype.configureKey = function(enable) {
 
 // Remove the current document (if there is one)
 // and set up for a new one
-haste.prototype.newDocument = function(hideHistory) {
+haste.prototype.newDocument = function(hideHistory, useCache) {
   this.$box.hide();
   this.doc = new haste_document();
   if (!hideHistory) {
@@ -154,9 +155,16 @@ haste.prototype.newDocument = function(hideHistory) {
   }
   this.setTitle();
   this.lightKey();
-  this.$textarea.val('').show('fast', function() {
-    this.focus();
-  });
+  var autosave = localStorage.getItem('autosave');
+  if (autosave && useCache) {
+    this.$textarea.val(autosave).show('fast', function() {
+      this.focus();
+    });
+  } else {
+    this.$textarea.val('').show('fast', function() {
+      this.focus();
+    });
+  }
   this.removeLineNumbers();
 };
 
@@ -165,12 +173,12 @@ haste.prototype.newDocument = function(hideHistory) {
 // due to the behavior of lookupTypeByExtension and lookupExtensionByType
 // Note: optimized for lookupTypeByExtension
 haste.extensionMap = {
-	sh: 'bash', clike: 'c-like', coffee: 'coffeescript', cs: 'csharp', dpr: 'delphi',
-	erl: 'erlang', hs: 'haskell', js: 'javascript', kt: 'kotlin', tex: 'latex',
-	lsp: 'lisp', mk: 'makefile', md: 'markdown', mm: 'objectivec', phptemp: 'php-template',
-	pl: 'perl',	txt: 'plaintext', py: 'python', pyrepl: 'python-repl', rb: 'ruby', rs: 'rust',
-	sc: 'scala', sm: 'smalltalk', ts: 'typscript', vbs: 'vbscript', html: 'xml', htm: 'xml',
-}
+  sh: 'bash', clike: 'c-like', coffee: 'coffeescript', cs: 'csharp', dpr: 'delphi',
+  erl: 'erlang', hs: 'haskell', js: 'javascript', kt: 'kotlin', tex: 'latex',
+  lsp: 'lisp', mk: 'makefile', md: 'markdown', mm: 'objectivec', phptemp: 'php-template',
+  pl: 'perl',	txt: 'plaintext', py: 'python', pyrepl: 'python-repl', rb: 'ruby', rs: 'rust',
+  sc: 'scala', sm: 'smalltalk', ts: 'typscript', vbs: 'vbscript', html: 'xml', htm: 'xml',
+};
 
 // Look up the extension preferred for a type
 // If not found, return the type itself - which we'll place as the extension
@@ -203,9 +211,11 @@ haste.prototype.removeLineNumbers = function() {
 };
 
 // Load a document and show it
-haste.prototype.loadDocument = function(key) {
+haste.prototype.loadDocument = function(key, location) {
   // Split the key up
-  var parts = key.split('.', 2);
+  var language = new URLSearchParams(window.location.search);
+  language = language.get('syntax');
+  var parts = [key, language];
   // Ask for what we want
   var _this = this;
   _this.doc = new haste_document();
@@ -245,7 +255,7 @@ haste.prototype.lockDocument = function() {
       _this.setTitle(ret.key);
       var file = '/' + ret.key;
       if (ret.language) {
-        file += '.' + _this.lookupExtensionByType(ret.language);
+        file += '?syntax=' + _this.lookupExtensionByType(ret.language);
       }
       window.history.pushState(null, _this.appName + '-' + ret.key, file);
       _this.fullKey();
@@ -280,7 +290,7 @@ haste.prototype.configureButtons = function() {
       },
       shortcutDescription: 'control + n',
       action: function() {
-        _this.newDocument(!_this.doc.key);
+        _this.newDocument(!_this.doc.key, false);
       }
     },
     {
@@ -359,6 +369,34 @@ haste.prototype.configureShortcuts = function() {
     }
   });
 };
+
+haste.prototype.autosave = function() {
+  var _this = this;
+  var saved;
+  _this.$textarea.on('keydown', function () {
+    _this.doc.changed = true;
+  });
+  window.onbeforeunload = saveNow;
+  function saveNow(){
+    save();
+    return null;
+  }
+
+  var save = function() {
+    saved = localStorage.getItem('autosave') || '';
+    if (_this.doc && !_this.doc.locked && _this.doc.changed  && _this.$textarea.val().length !== 0 && _this.$textarea.val().length !== saved.length) {
+      localStorage.setItem('autosave', _this.$textarea.val());
+      console.log('[Haste] auto saving input');
+      _this.doc.changed = false;
+    }
+  }; 
+
+
+  window.setInterval(function(){
+    save();
+  }, 30000);
+};
+
 
 ///// Tab behavior in the textarea - 2 spaces per tab
 $(function() {
