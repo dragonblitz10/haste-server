@@ -92,7 +92,7 @@ const limiter = rl({
   max: config.ratelimit.requests,
   message: { error: 'Please slow down!' }
 });
-// Hide express is running and allow COR
+// Hide express is running and allow CORS
 app.use((req, res, next) => {
   res.setHeader('X-Powered-By', 'Hastebin/Server');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -101,7 +101,7 @@ app.use((req, res, next) => {
 // Static assets, Rate Limits and parse text
 app.use(express.static('static'));
 app.use(limiter);
-app.use(bodyParser.text());
+app.use(bodyParser.raw());
 
 // Main endpoints
 app.get('/raw/:id', function(request, response) {

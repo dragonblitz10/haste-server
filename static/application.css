@@ -4,6 +4,44 @@ body {
 	margin: 0px;
 }
 
+/* body scrollbars */
+body::-webkit-scrollbar {
+	width: 20px;
+  }
+  
+  body::-webkit-scrollbar-track {
+	background-color: transparent;
+  }
+  
+  body::-webkit-scrollbar-thumb {
+	background-color: #d6dee1;
+	border-radius: 20px;
+	border: 6px solid transparent;
+	background-clip: content-box;
+  }
+  /* textarea scrollbar */
+  textarea::-webkit-scrollbar-thumb:hover {
+	background-color: #a8bbbf;
+  }
+
+  textarea::-webkit-scrollbar {
+	width: 20px;
+  }
+  
+  textarea::-webkit-scrollbar-track {
+	background-color: transparent;
+  }
+  
+  textarea::-webkit-scrollbar-thumb {
+	background-color: #d6dee1;
+	border-radius: 20px;
+	border: 6px solid transparent;
+	background-clip: content-box;
+  }
+  
+  textarea::-webkit-scrollbar-thumb:hover {
+	background-color: #a8bbbf;
+  }
 /* textarea */
 
 textarea {

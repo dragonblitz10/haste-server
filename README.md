@@ -35,6 +35,10 @@ STDOUT.  Check the README there for more details and usages.
 3.  `npm install`
 4.  `npm start` or `node .`
 
+## Repl
+[![Run on Repl.it](https://repl.it/badge/github/dragonblitz10/haste-server)](https://repl.it/github/dragonblitz10/haste-server)
+
+
 ## Settings
 
 * `host` - the host the server runs on (default localhost)
